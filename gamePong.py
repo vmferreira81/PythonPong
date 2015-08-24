@@ -11,6 +11,9 @@ def startValues():
     global player_lost
     global score
     global high_score
+    global mx
+    global my
+    mx, my = pygame.mouse.get_pos()
     speed_x = 150
     speed_y = 150
     x = SCREEN_SIZE[0]/2
@@ -24,6 +27,8 @@ def drawBackgound():
 
 
 def drawBar():
+    global mx
+    global my
     mx, my = pygame.mouse.get_pos()
     if ((mx + bar.get_width()) > SCREEN_SIZE[0]):
         mx = SCREEN_SIZE[0] - bar.get_width()
@@ -51,8 +56,9 @@ def ballHitTop():
 
 
 def ballHitBar():
-    barX, barY = pygame.mouse.get_pos()
-    return ((y > SCREEN_SIZE[1] - ball.get_height() - bar.get_height()) and ((x > barX - ball.get_width()) and (x < barX + bar.get_width() + ball.get_width())))
+    print (mx)
+    return ((y > SCREEN_SIZE[1] - ball.get_height() - bar.get_height()) and
+           ((x > mx - ball.get_width()) and (x < mx + bar.get_width() + ball.get_width())))
 
 
 def drawScores():
@@ -78,9 +84,9 @@ screen = pygame.display.set_mode(SCREEN_SIZE, 0, 32)
 contador_surface = font.render("Score: ", True, (0, 0, 255))
 
 bar = pygame.Surface((80, 20))
-ball = pygame.Surface((20,20)).convert_alpha()
+ball = pygame.Surface((20, 20)).convert_alpha()
 ball.fill(colorWhite)
-pygame.draw.circle(ball, colorBlack, (10,10), 10)
+pygame.draw.circle(ball, colorBlack, (10, 10), 10)
 
 restart_file = "restart.png"
 restart_button = pygame.image.load(restart_file).convert_alpha()
@@ -93,20 +99,19 @@ while True:
         if event.type == QUIT:
             pygame.quit()
             exit()
-        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1 and player_lost == True:
+        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1 and player_lost is True:
             if restart_rect.collidepoint(pygame.mouse.get_pos()):
                 startValues()
-    if  not player_lost:
+    if not player_lost:
         drawBackgound()
         drawBar()
-        drawBall((x,y))
+        drawBall((x, y))
         drawScores()
-        
     time_passed = clock.tick(30)
     time_passed_seconds = time_passed / 1000.0
-    x += speed_x * time_passed_seconds 
+    x += speed_x * time_passed_seconds
     y += speed_y * time_passed_seconds
-    
+   
     if ballHitRight():
         speed_x = -speed_x
         x = SCREEN_SIZE[0] - ball.get_width()
@@ -117,9 +122,9 @@ while True:
 
     if ballHitBottom():
         screen.blit(text_surface, (SCREEN_SIZE[0]/2 - text_surface.get_width()/2, SCREEN_SIZE[1]/2 - text_surface.get_height()))
-        player_lost = True   
-        restart_rect = screen.blit(restart_button, (SCREEN_SIZE[0]/2 - restart_button.get_width()/2, SCREEN_SIZE[1]/2 + text_surface.get_height()/2 ))
-        
+        player_lost = True 
+        restart_rect = screen.blit(restart_button, (SCREEN_SIZE[0]/2 - restart_button.get_width()/2, SCREEN_SIZE[1]/2 + text_surface.get_height()/2 ))        
+    
     elif ballHitTop():
         speed_y = -speed_y
         y = 0
@@ -133,5 +138,4 @@ while True:
         speed_x = speed_x + ( (speed_x*score+1)/80)
         speed_y = speed_y + ( (speed_y*score+1)/80)
     
-
     pygame.display.update()
