@@ -98,20 +98,24 @@ def drawScores():
     higscoretext = small_font.render("High Score = "+str(high_score), 1, (0,0,0))
     screen.blit(higscoretext, (5, 30))
 
+def display_end_game_message():
+    restart_file = "restart.png"
+    restart_button = pygame.image.load(restart_file).convert_alpha()
+    youlostmessage = "You lose"
+    text_surface = font.render(youlostmessage, True, (0, 0, 255))
+    screen.blit(text_surface, (SCREEN_SIZE[0]/2 - text_surface.get_width()/2, SCREEN_SIZE[1]/2 - text_surface.get_height()))
+    player_lost = True 
+    restart_rect = screen.blit(restart_button, (SCREEN_SIZE[0]/2 - restart_button.get_width()/2, SCREEN_SIZE[1]/2 + text_surface.get_height()/2 ))        
+
+
 pygame.init()
+
 clock = pygame.time.Clock()
-
-youlostmessage = "You lose"
 font = pygame.font.SysFont("arial", 80);
-text_surface = font.render(youlostmessage, True, (0, 0, 255))
-
 small_font = pygame.font.SysFont("monospace", 16)
 screen = pygame.display.set_mode(SCREEN_SIZE, 0, 32)
-
 contador_surface = font.render("Score: ", True, (0, 0, 255))
 
-restart_file = "restart.png"
-restart_button = pygame.image.load(restart_file).convert_alpha()
 
 startValues()
 high_score = 0
@@ -155,10 +159,8 @@ while True:
         x = 0
 
     if ballHitBottom():
-        screen.blit(text_surface, (SCREEN_SIZE[0]/2 - text_surface.get_width()/2, SCREEN_SIZE[1]/2 - text_surface.get_height()))
-        player_lost = True 
-        restart_rect = screen.blit(restart_button, (SCREEN_SIZE[0]/2 - restart_button.get_width()/2, SCREEN_SIZE[1]/2 + text_surface.get_height()/2 ))        
-    
+        display_end_game_message()
+            
     elif ballHitTop():
         speed_y = -speed_y
         y = 0
