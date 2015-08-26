@@ -3,6 +3,55 @@ from pygame.locals import *
 from sys import exit
 
 
+BLACK = (0, 0, 0)
+WHITE = (255, 255, 255)
+RED = (255, 0, 0)
+SCREEN_SIZE = (640, 480)
+
+
+class Bar(pygame.sprite.Sprite):
+
+    def __init__(self, color, width, height):
+        super().__init__()
+        self.image = pygame.Surface((width, height))
+        self.image.fill(color)
+        self.rect = self.image.get_rect()
+        pygame.draw.rect(self.image, color, [0, 0, width, height])
+        self.rect.y = SCREEN_SIZE[1] - height
+
+    def get_width(self):
+        return self.rect.width
+
+    def get_height(self):
+        return self.rect.height
+
+    def update_pos(self):
+        mx, my = pygame.mouse.get_pos()
+        if ((mx + bar.get_width()) > SCREEN_SIZE[0]):
+            mx = SCREEN_SIZE[0] - bar.get_width()
+        self.rect.x = mx
+
+
+class Ball(pygame.sprite.Sprite):
+
+    def __init__(self, color, width, height):
+        super().__init__()
+        self.image = pygame.Surface((width, height)).convert_alpha()
+        self.image.fill(WHITE)
+        self.rect = self.image.get_rect()
+        pygame.draw.circle(self.image, color, (10, 10), 10)
+
+    def get_width(self):
+        return self.rect.width
+
+    def get_height(self):
+        return self.rect.height
+
+    def update_pos(self, x, y):
+        self.rect.x = x
+        self.rect.y = y
+
+
 def startValues():
     global speed_x
     global speed_y
@@ -11,9 +60,6 @@ def startValues():
     global player_lost
     global score
     global high_score
-    global mx
-    global my
-    mx, my = pygame.mouse.get_pos()
     speed_x = 150
     speed_y = 150
     x = SCREEN_SIZE[0]/2
@@ -23,20 +69,7 @@ def startValues():
 
 
 def drawBackgound():
-    pygame.draw.rect(screen, tuple(colorWhite), (0, 0, 640, 480))
-
-
-def drawBar():
-    global mx
-    global my
-    mx, my = pygame.mouse.get_pos()
-    if ((mx + bar.get_width()) > SCREEN_SIZE[0]):
-        mx = SCREEN_SIZE[0] - bar.get_width()
-    screen.blit(bar, (mx, SCREEN_SIZE[1] - bar.get_height()))
-
-
-def drawBall(position):
-    screen.blit(ball, position)
+    pygame.draw.rect(screen, tuple(WHITE), (0, 0, 640, 480))
 
 
 def ballHitRight():
@@ -56,9 +89,7 @@ def ballHitTop():
 
 
 def ballHitBar():
-    print (mx)
-    return ((y > SCREEN_SIZE[1] - ball.get_height() - bar.get_height()) and
-           ((x > mx - ball.get_width()) and (x < mx + bar.get_width() + ball.get_width())))
+    return len(pygame.sprite.spritecollide(ball, sprites, False)) > 0
 
 
 def drawScores():
@@ -70,10 +101,6 @@ def drawScores():
 pygame.init()
 clock = pygame.time.Clock()
 
-SCREEN_SIZE = (640, 480)
-colorWhite = [255, 255, 255]
-colorBlack = [0, 0, 0]
-
 youlostmessage = "You lose"
 font = pygame.font.SysFont("arial", 80);
 text_surface = font.render(youlostmessage, True, (0, 0, 255))
@@ -83,16 +110,21 @@ screen = pygame.display.set_mode(SCREEN_SIZE, 0, 32)
 
 contador_surface = font.render("Score: ", True, (0, 0, 255))
 
-bar = pygame.Surface((80, 20))
-ball = pygame.Surface((20, 20)).convert_alpha()
-ball.fill(colorWhite)
-pygame.draw.circle(ball, colorBlack, (10, 10), 10)
-
 restart_file = "restart.png"
 restart_button = pygame.image.load(restart_file).convert_alpha()
 
 startValues()
 high_score = 0
+bar = Bar(BLACK, 80, 20)
+ball = Ball(BLACK, 20, 20)
+
+sprites = pygame.sprite.Group()
+sprites.add(bar)
+sprites.draw(screen)
+
+spriteBall = pygame.sprite.Group()
+spriteBall.add(ball)
+spriteBall.draw(screen)
 
 while True:
     for event in pygame.event.get():
@@ -104,8 +136,10 @@ while True:
                 startValues()
     if not player_lost:
         drawBackgound()
-        drawBar()
-        drawBall((x, y))
+        bar.update_pos()
+        ball.update_pos(x, y)
+        sprites.draw(screen)
+        spriteBall.draw(screen)
         drawScores()
     time_passed = clock.tick(30)
     time_passed_seconds = time_passed / 1000.0
